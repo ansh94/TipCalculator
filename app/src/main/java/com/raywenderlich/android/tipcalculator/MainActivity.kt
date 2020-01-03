@@ -31,12 +31,16 @@
 package com.raywenderlich.android.tipcalculator
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.activity_main.*
 
 /**
  * Main Tip Calculator Screen
  */
 class MainActivity : AppCompatActivity() {
+
 
   override fun onCreate(savedInstanceState: Bundle?) {
     // Switch to AppTheme for displaying the activity
@@ -44,5 +48,47 @@ class MainActivity : AppCompatActivity() {
 
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
+
+    // Text changed listener for tip percentage
+    tipPercentage.addTextChangedListener(object : TextWatcher {
+      override fun afterTextChanged(s: Editable?) {
+        if (s.toString().isNotEmpty() && billAmount.text.isNotEmpty()) {
+
+          // Max tip % cannot be greater than 100
+          if (s.toString().toInt() > 100) {
+            tipPercentage.setText(getString(R.string.default_percent_exceeded))
+          }
+          calculateTip()
+        }
+      }
+
+      override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+      override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+    })
+
+    // Text changed listener for bill amount
+    billAmount.addTextChangedListener(object : TextWatcher {
+      override fun afterTextChanged(s: Editable?) {
+        if (s.toString().isNotEmpty() && tipPercentage.text.isNotEmpty()) {
+          calculateTip()
+        }
+      }
+
+      override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+      override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+    })
+  }
+
+  private fun calculateTip() {
+    val tipPercentValue = tipPercentage.text.toString().toDouble()
+    val billAmountValue = billAmount.text.toString().toDouble()
+    val tipAmountValue = (tipPercentValue / 100) * billAmountValue
+    val finalAmount = billAmountValue + tipAmountValue
+    tipAmount.text = String.format("%.2f", tipAmountValue)
+    totalAmount.text = String.format("%.2f", finalAmount)
   }
 }
